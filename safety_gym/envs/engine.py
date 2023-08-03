@@ -384,7 +384,8 @@ class Engine(gym.Env, gym.utils.EzPickle):
     @property
     def selected_obs(self):
         ''' Helper to get selected observation [pos, vel, acc, gyro]'''
-        sel_obs = np.concatenate((self.robot_pos[:2], 
+        sel_obs = np.concatenate((
+                                  # self.robot_pos[:2], 
                                   self.robot_vel[:2],
                                   self.robot_acc[:2], 
                                   # self.robot_gyro, 

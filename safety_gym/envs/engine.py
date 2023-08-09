@@ -364,6 +364,18 @@ class Engine(gym.Env, gym.utils.EzPickle):
         return self.data.get_body_xvelp('robot').copy()
 
     @property
+    def nrs(self):
+        return 2 + 2 + self.robot.nq + self.robot.nv
+
+    @property
+    def robot_state(self):
+        return np.concatenate((
+                                self.robot_pos[:2],
+                                self.robot_vel[:2],
+                                self.data.qpos.copy(),
+                                self.data.qvel.copy(),
+                                ),axis=0)
+    @property
     def robot_real_state(self):
         '''Helper to get current robot real state [pos, vel]'''
         return np.concatenate((
@@ -371,7 +383,7 @@ class Engine(gym.Env, gym.utils.EzPickle):
                                 self.robot_vel[:2],
                                 self.robot_acc[:2],
                                 # self.robot_mvel[:2],
-                                self.robot_gyro[2],),axis=0)
+                                self.robot_gyro[2:3]),axis=0)
 
     def calculate_acceleration(accelerometer_data, gyro_data):
         # Calculate the orientation of the sensor.

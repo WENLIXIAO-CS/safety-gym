@@ -366,7 +366,32 @@ class Engine(gym.Env, gym.utils.EzPickle):
     @property
     def robot_real_state(self):
         '''Helper to get current robot real state [pos, vel]'''
-        return np.concatenate((self.robot_pos[:2], self.robot_vel[:2]))
+        return np.concatenate((
+                                self.robot_pos[:2], 
+                                self.robot_vel[:2],
+                                self.robot_acc[:2],
+                                # self.robot_mvel[:2],
+                                self.robot_gyro[2],),axis=0)
+
+    def calculate_acceleration(accelerometer_data, gyro_data):
+        # Calculate the orientation of the sensor.
+        orientation = np.arctan2(gyro_data[1], gyro_data[0])
+
+        # Convert the accelerometer data to the cartesian coordinate system.
+        acceleration = accelerometer_data * np.cos(orientation)
+
+        return acceleration
+
+    @property
+    def robot_cart_acc(self):
+        '''acceleration respect to cartesian coordinate'''
+        # __import__('pdb').set_trace()
+        gyro_data = self.robot_gyro.copy()
+        acc_data = self.robot_acc.copy()
+        print(acc_data, gyro_data)
+        orientation = np.arctan2(gyro_data[1], gyro_data[0])
+        cart_acc = acc_data * np.cos(orientation)
+        return cart_acc
 
     @property
     def robot_acc(self):
@@ -388,6 +413,7 @@ class Engine(gym.Env, gym.utils.EzPickle):
                                   # self.robot_pos[:2], 
                                   self.robot_vel[:2],
                                   self.robot_acc[:2], 
+                                  # self.robot_cart_acc[:2], 
                                   # self.robot_gyro, 
                                   # self.robot_mvel
                                   ))
@@ -1288,6 +1314,7 @@ class Engine(gym.Env, gym.utils.EzPickle):
         # action_scale = action_range[:,1] - action_range[:, 0]
         self.data.ctrl[:] = np.clip(action, action_range[:,0], action_range[:,1]) #np.clip(action * 2 / action_scale, -1, 1)
         if self.action_noise:
+            assert False
             self.data.ctrl[:] += self.action_noise * self.rs.randn(self.model.nu)
 
         # Simulate physics forward

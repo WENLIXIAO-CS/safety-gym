@@ -365,8 +365,14 @@ class Engine(gym.Env, gym.utils.EzPickle):
 
     @property
     def nrs(self):
-        return 2 + 2 + self.robot.nq + self.robot.nv
+        return 2 * 2 + 10 + 9
 
+    @property
+    def robot_state2(self):
+        return np.concatenate((
+                                self.robot_pos[:2],
+                                self.robot_vel[:2],
+                                ),axis=0)
     @property
     def robot_state(self):
         return np.concatenate((
